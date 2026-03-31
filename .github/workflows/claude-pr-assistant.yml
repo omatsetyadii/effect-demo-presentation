@@ -1,0 +1,85 @@
+name: Claude PR Assistant
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened, assigned]
+  pull_request_review:
+    types: [submitted]
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  claude-code-action:
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
+      (github.event_name == 'issues' && contains(github.event.issue.body, '@claude')) ||
+      (github.event_name == 'pull_request' && github.event.action == 'opened')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+      actions: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude PR Action
+        uses: anthropics/claude-code-action@v1
+        with:
+          track_progress: true
+          additional_permissions: |
+            actions: read
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Check existing PR comments first:
+            - Avoid duplicate feedback from previous reviews
+            - If Linear bot comments exist, review code changes against those ticket requirements
+
+            Use context7 to get reference documents and best practices.
+
+            Review the code changes for:
+            - Logic correctness and edge cases
+            - Security vulnerabilities (SQL injection, XSS, exposed secrets, auth bypass)
+            - Performance issues (N+1 queries, inefficient algorithms, memory leaks)
+            - Data races and concurrency issues
+            - Error handling completeness
+            - Code consistency with existing patterns
+            - Maintainability and readability
+            - Modularity and separation of concerns
+            - Code complexity (cyclomatic complexity, nested logic)
+            - Best practices: DRY, SOLID, KISS
+
+            Project-specific checks:
+            - Ruby/Rails/GraphQL conventions
+            - GraphQL mutations have audit logging (log_audit call)
+            - Test coverage for critical changes
+
+            For each issue found:
+            1. Describe the problem clearly
+            2. Reference specific file and line numbers
+            3. Provide concrete solution with code example
+            4. Explain why it matters
+
+            Group similar issues together to avoid repetition.
+
+            If no issues found: "✅ Code review complete. No issues found."
+
+            Use `gh pr comment` for top-level feedback only.
+            Only post GitHub comments - don't submit review text as messages.
+          claude_args: |
+            --allowedTools "Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),mcp__context7__resolve-library-id,mcp__context7__get-library-docs"
+            --mcp-config '{"mcpServers":{"context7":{"command":"npx","args":["-y","@upstash/context7-mcp"]}}}'
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
