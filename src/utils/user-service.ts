@@ -1,43 +1,48 @@
-import { Effect, pipe } from "effect"
+import { Data, Effect, pipe } from "effect"
+
+class FetchUserError extends Data.TaggedError("FetchUserError")<{ cause: unknown }> {}
+class SearchError extends Data.TaggedError("SearchError")<{ cause: unknown }> {}
 
 interface User {
   id: number
   name: string
   email: string
-  password: string
+  role: "admin" | "user"
 }
 
-// Fetch user from API
-export const fetchUser = (id: number): Effect.Effect<User, Error> =>
+const safeFetch = (url: string) =>
   Effect.tryPromise({
-    try: () => fetch(`/api/users/${id}`).then(res => res.json()),
-    catch: () => new Error("Failed to fetch user")
+    try: () =>
+      fetch(url).then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        return res.json()
+      }),
+    catch: (cause) => new FetchUserError({ cause }),
   })
 
-// Get user with admin check
-export const getUserWithRole = (id: any) =>
+export const fetchUser = (id: number): Effect.Effect<User, FetchUserError> =>
+  safeFetch(`/api/users/${id}`)
+
+export const getUserWithRole = (id: number) =>
   pipe(
     fetchUser(id),
-    Effect.map(user => ({
+    Effect.map((user) => ({
       ...user,
-      isAdmin: user.email.includes("admin"),
-      token: btoa(user.password)
+      isAdmin: user.role === "admin",
     }))
   )
 
-// Process multiple users
-export const processUsers = (ids: number[]) => {
-  let results: any[] = []
-  for (let i = 0; i < ids.length; i++) {
-    const user = fetchUser(ids[i])
-    results.push(user)
-  }
-  return results
-}
+export const processUsers = (ids: number[]): Effect.Effect<User[], FetchUserError> =>
+  Effect.all(ids.map(fetchUser), { concurrency: "unbounded" })
 
-// Search users by query
-export const searchUsers = (query: string) =>
+export const searchUsers = (query: string): Effect.Effect<User[], SearchError> =>
   Effect.tryPromise({
-    try: () => fetch(`/api/users/search?q=${query}`).then(r => r.json()),
-    catch: () => new Error("Search failed")
+    try: () => {
+      const params = new URLSearchParams({ q: query })
+      return fetch(`/api/users/search?${params}`).then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        return r.json()
+      })
+    },
+    catch: (cause) => new SearchError({ cause }),
   })
