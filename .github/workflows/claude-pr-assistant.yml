@@ -53,19 +53,18 @@ jobs:
 
             Review the code changes for:
             - Logic correctness and edge cases
-            - Security vulnerabilities (SQL injection, XSS, exposed secrets, auth bypass)
-            - Performance issues (N+1 queries, inefficient algorithms, memory leaks)
-            - Data races and concurrency issues
+            - Security vulnerabilities (XSS, exposed secrets, auth bypass)
+            - Performance issues (inefficient algorithms, memory leaks)
             - Error handling completeness
             - Code consistency with existing patterns
             - Maintainability and readability
             - Modularity and separation of concerns
-            - Code complexity (cyclomatic complexity, nested logic)
             - Best practices: DRY, SOLID, KISS
 
             Project-specific checks:
-            - Ruby/Rails/GraphQL conventions
-            - GraphQL mutations have audit logging (log_audit call)
+            - TypeScript/React/Effect-TS conventions
+            - Proper use of Effect, Layer, Schema, pipe
+            - Clean architecture and separation of concerns
             - Test coverage for critical changes
 
             For each issue found:
