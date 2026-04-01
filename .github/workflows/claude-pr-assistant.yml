@@ -12,7 +12,6 @@ on:
 
 concurrency:
   group: claude-pr-${{ github.event_name }}-${{ github.event.pull_request.number || github.event.issue.number }}
-  cancel-in-progress: true
 
 jobs:
   claude-code-action:
