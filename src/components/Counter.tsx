@@ -1,16 +1,49 @@
 import { useState } from "react";
+import "./Counter.css";
 
-export function Counter() {
-  const [count, setCount] = useState(0);
+interface CounterProps {
+  initialValue?: number;
+  step?: number;
+}
+
+export function Counter({ initialValue = 0, step = 1 }: CounterProps) {
+  const [count, setCount] = useState<number>(initialValue);
+
+  const increment = () => setCount((prev) => prev + step);
+  const decrement = () => setCount((prev) => prev - step);
+  const reset = () => setCount(initialValue);
 
   return (
     <div className="counter">
-      <h2>Counter</h2>
-      <div className="counter-display">{count}</div>
-      <div className="counter-buttons">
-        <button onClick={() => setCount((c) => c - 1)}>Decrement</button>
-        <button onClick={() => setCount(0)}>Reset</button>
-        <button onClick={() => setCount((c) => c + 1)}>Increment</button>
+      <h2 className="counter-title">Counter</h2>
+      <div className="counter-value" aria-live="polite" data-testid="counter-value">
+        {count}
+      </div>
+      <div className="counter-controls">
+        <button
+          type="button"
+          className="counter-button counter-button--decrement"
+          onClick={decrement}
+          aria-label="Decrement counter"
+        >
+          −
+        </button>
+        <button
+          type="button"
+          className="counter-button counter-button--reset"
+          onClick={reset}
+          aria-label="Reset counter"
+        >
+          Reset
+        </button>
+        <button
+          type="button"
+          className="counter-button counter-button--increment"
+          onClick={increment}
+          aria-label="Increment counter"
+        >
+          +
+        </button>
       </div>
     </div>
   );

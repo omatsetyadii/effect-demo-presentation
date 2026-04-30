@@ -246,50 +246,6 @@ header p {
   color: #4ade80;
 }
 
-/* Counter */
-.counter {
-  background: #1e1e1e;
-  border: 1px solid #333;
-  border-radius: 12px;
-  padding: 2rem;
-  text-align: center;
-  max-width: 400px;
-  margin: 2rem auto;
-}
-
-.counter h2 {
-  margin: 0 0 1rem 0;
-  color: #667eea;
-}
-
-.counter-display {
-  font-size: 4rem;
-  font-weight: bold;
-  color: #4ade80;
-  margin: 1.5rem 0;
-}
-
-.counter-buttons {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.counter-buttons button {
-  background: #667eea;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.counter-buttons button:hover {
-  background: #764ba2;
-}
-
 /* Mobile */
 @media (max-width: 768px) {
   header h1 {
