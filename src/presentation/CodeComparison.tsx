@@ -24,7 +24,7 @@ interface Task {
 
 interface RaceTaskState {
   name: string;
-  state: "pending" | "running" | "winner" | "cancelled" | "timeout";
+  state: "pending" | "running" | "winner" | "cancelled" | "timeout" | "completed";
   duration: number;
 }
 
@@ -952,5 +952,6 @@ function getRaceColor(state: RaceTaskState["state"]): string {
     case "winner": return "#10b981";
     case "cancelled": return "#6b7280";
     case "timeout": return "#f59e0b";
+    case "completed": return "#4ade80";
   }
 }

@@ -61,7 +61,7 @@ console.log("");
 console.log("4. PROMISE vs EFFECT:\n");
 
 console.log("   Creating Promise:");
-const promise = new Promise((resolve) => {
+void new Promise((resolve) => {
   console.log("   💥 Promise: Running NOW (can't stop me!)");
   resolve(42);
 });

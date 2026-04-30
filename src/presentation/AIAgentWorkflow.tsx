@@ -94,7 +94,7 @@ export function AIAgentPlainJS() {
 export function AIAgentEffect() {
   const [step, setStep] = useState<Step>("idle");
   const [result, setResult] = useState<string | null>(null);
-  const fiberRef = useRef<Fiber.RuntimeFiber<string, Error> | null>(null);
+  const fiberRef = useRef<Fiber.RuntimeFiber<void, never> | null>(null);
 
   // Define the workflow
   const runAgentEffect = (prompt: string) =>
