@@ -19,6 +19,13 @@ import {
   EffectComposability,
 } from "./presentation/Composability";
 import { CodeComparisonDemo } from "./presentation/CodeComparison";
+import {
+  EagerEvaluation,
+  LazyEvaluation,
+  PipelineVisualizer,
+  NestedVsPipe,
+  PipelineErrorHandling,
+} from "./presentation/ThunkAndPipeline";
 
 type DemoType =
   | "unstoppable"
@@ -26,6 +33,7 @@ type DemoType =
   | "failures"
   | "composability"
   | "code-comparison"
+  | "thunk-pipeline"
   | null;
 
 function App() {
@@ -71,6 +79,12 @@ function App() {
           className={activeDemo === "code-comparison" ? "active" : ""}
         >
           5. Code Comparison (Vanilla vs Effect)
+        </button>
+        <button
+          onClick={() => setActiveDemo("thunk-pipeline")}
+          className={activeDemo === "thunk-pipeline" ? "active" : ""}
+        >
+          6. Thunk &amp; Pipeline
         </button>
         <button onClick={() => setActiveDemo(null)}>Hide Demos</button>
       </div>
@@ -290,6 +304,96 @@ function App() {
                 shorter - it makes complex operations composable, readable, and
                 correct by default. No manual state tracking, no cleanup bugs,
                 no resource leaks.
+              </li>
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* Demo 6: Thunk & Pipeline */}
+      {activeDemo === "thunk-pipeline" && (
+        <div className="comparison">
+          <div className="comparison-header">
+            <h2>Demo 6: Thunk &amp; Pipeline — Lazy Evaluation + Linear Composition</h2>
+            <p>
+              An Effect is a thunk: a description of work that only executes when you run it.
+              Pipeline (pipe) threads values through transformations in a readable, top-to-bottom style.
+            </p>
+          </div>
+
+          {/* Section 1: Thunk */}
+          <div
+            style={{
+              padding: "0 20px",
+              marginBottom: "16px",
+              borderLeft: "3px solid #667eea",
+              paddingLeft: "16px",
+            }}
+          >
+            <h3 style={{ color: "#667eea", marginBottom: "4px" }}>
+              Part 1: Thunks — Lazy vs Eager Evaluation
+            </h3>
+            <p style={{ fontSize: "0.9em", color: "#888", margin: 0 }}>
+              A thunk is <code>() =&gt; value</code> — deferred work. Effect values are thunks:
+              nothing happens until <code>Effect.runPromise</code>.
+            </p>
+          </div>
+          <div className="comparison-grid">
+            <EagerEvaluation />
+            <LazyEvaluation />
+          </div>
+
+          {/* Section 2: Pipeline */}
+          <div
+            style={{
+              padding: "0 20px",
+              margin: "24px 0 16px",
+              borderLeft: "3px solid #4ade80",
+              paddingLeft: "16px",
+            }}
+          >
+            <h3 style={{ color: "#4ade80", marginBottom: "4px" }}>
+              Part 2: Pipelines — Linear Composition with pipe()
+            </h3>
+            <p style={{ fontSize: "0.9em", color: "#888", margin: 0 }}>
+              <code>pipe(value, f1, f2, f3)</code> is equivalent to <code>f3(f2(f1(value)))</code> —
+              but reads left-to-right, step by step.
+            </p>
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr",
+              gap: "20px",
+              padding: "0 20px",
+            }}
+          >
+            <PipelineVisualizer />
+            <NestedVsPipe />
+            <PipelineErrorHandling />
+          </div>
+
+          <div className="comparison-footer">
+            <strong>Key Insights:</strong>
+            <ul>
+              <li>
+                <strong>Thunk (lazy):</strong> Effect values are pure descriptions — no side effects
+                until <code>Effect.runPromise</code>. You can pass, transform, and combine them
+                freely without triggering execution.
+              </li>
+              <li>
+                <strong>Reusability:</strong> Because an Effect is a thunk, you can run the same
+                Effect multiple times, test it in isolation, or compose it into larger pipelines.
+              </li>
+              <li>
+                <strong>pipe():</strong> Threads a value through a sequence of functions
+                top-to-bottom. Avoids deeply nested calls, making the transformation order
+                immediately readable.
+              </li>
+              <li>
+                <strong>Error short-circuit:</strong> In a pipeline, a failed Effect skips all
+                subsequent <code>map</code>/<code>flatMap</code> steps and jumps straight to the
+                nearest <code>catchAll</code>, keeping error handling cleanly separated.
               </li>
             </ul>
           </div>
