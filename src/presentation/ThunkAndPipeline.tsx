@@ -10,6 +10,7 @@
  */
 
 import { useState } from "react";
+import type { CSSProperties } from "react";
 import { Effect, pipe } from "effect";
 
 interface LogEntry {
@@ -247,17 +248,8 @@ export function PipelineVisualizer() {
     addLog("Building pipeline... (no execution yet)", "info");
     await delay(300);
 
-    // Build the pipeline as a thunk — no execution during construction
-    const program = pipe(
-      Effect.succeed("hello world"),
-      Effect.map((s) => s.trim()),
-      Effect.map((s) => s.toUpperCase()),
-      Effect.tap((s) =>
-        Effect.sync(() => addLog(`  Tap sees: "${s}"`, "highlight"))
-      ),
-      Effect.map((s) => ({ value: s, length: s.length }))
-    );
-
+    // ── At this point the pipeline below is just a description (a thunk).
+    // ── Nothing executes until Effect.runPromise is called below.
     addLog("Pipeline constructed ✅ — zero work done yet", "success");
     await delay(500);
 
@@ -304,8 +296,6 @@ export function PipelineVisualizer() {
         })
       )
     );
-
-    void program; // show the pipeline was built separately
 
     addLog("✅ Pipeline complete!", "success");
     setRunning(false);
@@ -725,7 +715,7 @@ function LogOutput({ logs, maxHeight = "250px" }: LogOutputProps) {
   );
 }
 
-const codeStyle: React.CSSProperties = {
+const codeStyle: CSSProperties = {
   background: "#111",
   padding: "12px",
   borderRadius: "6px",

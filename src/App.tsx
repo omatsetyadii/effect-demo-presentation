@@ -324,10 +324,9 @@ function App() {
           {/* Section 1: Thunk */}
           <div
             style={{
-              padding: "0 20px",
+              padding: "0 20px 0 16px",
               marginBottom: "16px",
               borderLeft: "3px solid #667eea",
-              paddingLeft: "16px",
             }}
           >
             <h3 style={{ color: "#667eea", marginBottom: "4px" }}>
@@ -346,10 +345,9 @@ function App() {
           {/* Section 2: Pipeline */}
           <div
             style={{
-              padding: "0 20px",
+              padding: "0 20px 0 16px",
               margin: "24px 0 16px",
               borderLeft: "3px solid #4ade80",
-              paddingLeft: "16px",
             }}
           >
             <h3 style={{ color: "#4ade80", marginBottom: "4px" }}>
