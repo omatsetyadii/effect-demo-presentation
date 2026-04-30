@@ -19,6 +19,7 @@ import {
   EffectComposability,
 } from "./presentation/Composability";
 import { CodeComparisonDemo } from "./presentation/CodeComparison";
+import { ImportantNotesDemo } from "./presentation/ImportantNotes";
 
 type DemoType =
   | "unstoppable"
@@ -26,6 +27,7 @@ type DemoType =
   | "failures"
   | "composability"
   | "code-comparison"
+  | "important-notes"
   | null;
 
 function App() {
@@ -71,6 +73,12 @@ function App() {
           className={activeDemo === "code-comparison" ? "active" : ""}
         >
           5. Code Comparison (Vanilla vs Effect)
+        </button>
+        <button
+          onClick={() => setActiveDemo("important-notes")}
+          className={activeDemo === "important-notes" ? "active" : ""}
+        >
+          6. Important Notes
         </button>
         <button onClick={() => setActiveDemo(null)}>Hide Demos</button>
       </div>
@@ -290,6 +298,50 @@ function App() {
                 shorter - it makes complex operations composable, readable, and
                 correct by default. No manual state tracking, no cleanup bugs,
                 no resource leaks.
+              </li>
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* Demo 6: Important Notes */}
+      {activeDemo === "important-notes" && (
+        <div className="comparison">
+          <div className="comparison-header">
+            <h2>Demo 6: Important Notes from the Library</h2>
+            <p>
+              A curated reference of the high-leverage Effect TS concepts most
+              teams miss — with code sketches and live examples.
+            </p>
+          </div>
+          <ImportantNotesDemo />
+          <div className="comparison-footer">
+            <strong>How to use this page:</strong>
+            <ul>
+              <li>
+                <strong>Mental model first:</strong> Notes #1–#3 explain the
+                three type parameters, lazy construction, and errors-as-values.
+                Internalizing these unlocks everything else.
+              </li>
+              <li>
+                <strong>Day-to-day building blocks:</strong> Notes #4–#5 cover
+                tagged errors with <code>catchTag</code> and the three runners
+                (<code>runSync</code> / <code>runPromise</code> /{" "}
+                <code>runFork</code>). Both are interactive — click through the
+                scenarios to see typed recovery and the "runSync on async
+                throws" gotcha.
+              </li>
+              <li>
+                <strong>Production concerns:</strong> Notes #6–#10 cover Layers
+                for DI, <code>acquireRelease</code> for guaranteed cleanup,
+                composable <code>Schedule</code>s, <code>Ref</code> for safe
+                concurrent state, and <code>Stream</code> for lazy sequences.
+              </li>
+              <li>
+                <strong>Why this matters:</strong> The earlier demos show what
+                Effect can DO. These notes are the <em>vocabulary</em> — once
+                they're familiar, the surface area of the library shrinks
+                dramatically.
               </li>
             </ul>
           </div>
