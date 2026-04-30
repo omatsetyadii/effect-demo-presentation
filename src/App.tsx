@@ -19,6 +19,7 @@ import {
   EffectComposability,
 } from "./presentation/Composability";
 import { CodeComparisonDemo } from "./presentation/CodeComparison";
+import { Counter } from "./components/Counter";
 
 type DemoType =
   | "unstoppable"
@@ -26,6 +27,7 @@ type DemoType =
   | "failures"
   | "composability"
   | "code-comparison"
+  | "counter"
   | null;
 
 function App() {
@@ -71,6 +73,12 @@ function App() {
           className={activeDemo === "code-comparison" ? "active" : ""}
         >
           5. Code Comparison (Vanilla vs Effect)
+        </button>
+        <button
+          onClick={() => setActiveDemo("counter")}
+          className={activeDemo === "counter" ? "active" : ""}
+        >
+          Counter
         </button>
         <button onClick={() => setActiveDemo(null)}>Hide Demos</button>
       </div>
@@ -295,6 +303,9 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Counter */}
+      {activeDemo === "counter" && <Counter />}
 
       {/* Home Screen */}
       {!activeDemo && (
