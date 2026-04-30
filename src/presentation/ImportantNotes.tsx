@@ -25,20 +25,35 @@ import { Effect, Data, pipe } from "effect";
 // Tagged error definitions used by interactive demo #4
 // ============================================
 
+/** Raised when a requested resource does not exist in the data store. */
 class NotFoundError extends Data.TaggedError("NotFoundError")<{
   readonly id: string;
 }> {}
 
+/** Raised when the remote service returns an unexpected HTTP status code. */
 class NetworkError extends Data.TaggedError("NetworkError")<{
   readonly status: number;
 }> {}
 
+/** Raised when a field value violates a business rule or format constraint. */
 class ValidationError extends Data.TaggedError("ValidationError")<{
   readonly field: string;
 }> {}
 
+/** Union of all recoverable errors that `fetchUser` can produce. */
 type FetchError = NotFoundError | NetworkError | ValidationError;
 
+/**
+ * Simulates a user-fetch operation for the tagged-errors interactive demo.
+ *
+ * @param scenario - Controls which outcome the effect produces:
+ *   - `"ok"` — succeeds with a dummy user
+ *   - `"not-found"` — fails with {@link NotFoundError}
+ *   - `"network"` — fails with {@link NetworkError}
+ *   - `"validation"` — fails with {@link ValidationError}
+ * @returns An `Effect` whose success type is `{ id, name }` and whose error
+ *   type is the full {@link FetchError} union.
+ */
 const fetchUser = (
   scenario: "ok" | "not-found" | "network" | "validation"
 ): Effect.Effect<{ id: string; name: string }, FetchError> => {
@@ -58,14 +73,26 @@ const fetchUser = (
 // Note card primitive
 // ============================================
 
+/** Props accepted by the {@link NoteCard} display component. */
 interface NoteCardProps {
+  /** Sequential note number shown as the green `#N` prefix in the heading. */
   number: number;
+  /** Short title displayed in the card heading. */
   title: string;
+  /** One-sentence key insight rendered beneath the title. */
   takeaway: string;
+  /** Source-code snippet rendered inside a dark `<pre>` block. */
   code: string;
+  /** Optional interactive widget rendered below the code block. */
   body?: React.ReactNode;
 }
 
+/**
+ * Presentational card for a single "important note" entry.
+ *
+ * Renders a numbered heading, a takeaway sentence, a syntax-highlighted code
+ * block, and an optional interactive body section.
+ */
 function NoteCard({ number, title, takeaway, code, body }: NoteCardProps) {
   return (
     <div
@@ -107,6 +134,14 @@ function NoteCard({ number, title, takeaway, code, body }: NoteCardProps) {
 // Interactive demo: tagged errors + catchTag
 // ============================================
 
+/**
+ * Interactive demo for Note #4 — tagged errors and `Effect.catchTag`.
+ *
+ * Renders four scenario buttons (success, not-found, network, validation).
+ * Clicking one runs the corresponding {@link fetchUser} effect through a
+ * `catchTag` pipeline and displays the recovered message, illustrating how
+ * the TypeScript compiler narrows the error union after each handled branch.
+ */
 function TaggedErrorsDemo() {
   const [output, setOutput] = useState<string[]>([]);
 
@@ -167,6 +202,14 @@ function TaggedErrorsDemo() {
 // Interactive demo: runSync vs runPromise vs runFork
 // ============================================
 
+/**
+ * Interactive demo for Note #5 — the three Effect entry-point runners.
+ *
+ * Buttons trigger `runSync`, `runPromise`, and `runFork` scenarios and append
+ * output lines to a scrollable log. A fourth button deliberately calls
+ * `runSync` on an async effect so the audience can observe the thrown error,
+ * illustrating the rule: `runSync` only works with fully synchronous effects.
+ */
 function RunnersDemo() {
   const [output, setOutput] = useState<string[]>([]);
 
@@ -241,6 +284,15 @@ function RunnersDemo() {
 // Main page
 // ============================================
 
+/**
+ * Full-page demo: "Important Notes from the Effect TS Library".
+ *
+ * Renders ten {@link NoteCard} entries in a responsive grid. Notes #4 and #5
+ * embed interactive widgets ({@link TaggedErrorsDemo} and {@link RunnersDemo})
+ * so attendees can run live code without leaving the slide.
+ *
+ * Designed to be mounted as the content body of Demo 6 in `App.tsx`.
+ */
 export function ImportantNotesDemo() {
   return (
     <div
