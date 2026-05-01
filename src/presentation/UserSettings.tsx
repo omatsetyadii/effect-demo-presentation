@@ -4,10 +4,10 @@
  * Demonstrates Effect TS patterns for:
  * - Schema-based form validation
  * - Effect.gen for async save operations with error handling
- * - Ref for state management
+ * - Fiber.interrupt for debounced auto-save
  */
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { Effect, Schema, ParseResult, Fiber, pipe } from "effect";
 import "./UserSettings.css";
 
@@ -111,13 +111,15 @@ function ProfileSection({ profile, onSave }: ProfileSectionProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saveState, setSaveState] = useState<"idle" | "saving" | "success" | "error">("idle");
   const [saveMessage, setSaveMessage] = useState("");
-  const [avatarInitials, setAvatarInitials] = useState(
-    profile.displayName
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
+  const avatarInitials = useMemo(
+    () =>
+      form.displayName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2),
+    [form.displayName]
   );
 
   const updateField = (field: keyof ProfileData, value: string) => {
@@ -143,14 +145,6 @@ function ProfileSection({ profile, onSave }: ProfileSectionProps) {
         Effect.sync(() => {
           setSaveState("success");
           setSaveMessage(result.message);
-          setAvatarInitials(
-            form.displayName
-              .split(" ")
-              .map((n) => n[0])
-              .join("")
-              .toUpperCase()
-              .slice(0, 2)
-          );
           onSave(form);
           setTimeout(() => setSaveState("idle"), 3000);
         })
@@ -315,6 +309,14 @@ function PreferencesSection({ preferences, onSave }: PreferencesSectionProps) {
   const [saved, setSaved] = useState(false);
   const fiberRef = useRef<Fiber.RuntimeFiber<void, never> | null>(null);
 
+  useEffect(() => {
+    return () => {
+      if (fiberRef.current !== null) {
+        Effect.runFork(Fiber.interrupt(fiberRef.current));
+      }
+    };
+  }, []);
+
   const updatePref = <K extends keyof PreferencesData>(key: K, value: PreferencesData[K]) => {
     const next = { ...prefs, [key]: value };
     setPrefs(next);
@@ -356,6 +358,7 @@ function PreferencesSection({ preferences, onSave }: PreferencesSectionProps) {
             {(["dark", "light", "system"] as const).map((t) => (
               <button
                 key={t}
+                aria-pressed={prefs.theme === t}
                 className={`theme-btn ${prefs.theme === t ? "theme-btn--active" : ""}`}
                 onClick={() => updatePref("theme", t)}
               >
@@ -414,7 +417,12 @@ function PreferencesSection({ preferences, onSave }: PreferencesSectionProps) {
 // Account Section Component
 // ============================================
 
-function AccountSection() {
+interface AccountSectionProps {
+  profile: ProfileData;
+  preferences: PreferencesData;
+}
+
+function AccountSection({ profile, preferences }: AccountSectionProps) {
   const [deleteState, setDeleteState] = useState<"idle" | "confirm" | "deleting">("idle");
   const [exportState, setExportState] = useState<"idle" | "exporting" | "done">("idle");
 
@@ -428,8 +436,8 @@ function AccountSection() {
           // Simulate creating a data export
           const exportData = {
             exportedAt: new Date().toISOString(),
-            profile: { displayName: "Demo User", email: "demo@example.com" },
-            preferences: { theme: "dark", notifications: true },
+            profile,
+            preferences,
           };
           const blob = new Blob([JSON.stringify(exportData, null, 2)], {
             type: "application/json",
@@ -510,7 +518,12 @@ function AccountSection() {
                 className="btn-danger"
                 onClick={() => {
                   setDeleteState("deleting");
-                  setTimeout(() => setDeleteState("idle"), 2000);
+                  Effect.runFork(
+                    pipe(
+                      Effect.sleep("2000 millis"),
+                      Effect.tap(() => Effect.sync(() => setDeleteState("idle")))
+                    )
+                  );
                 }}
               >
                 Yes, Delete
@@ -595,7 +608,7 @@ export function UserSettingsPage() {
           {activeTab === "preferences" && (
             <PreferencesSection preferences={preferences} onSave={setPreferences} />
           )}
-          {activeTab === "account" && <AccountSection />}
+          {activeTab === "account" && <AccountSection profile={profile} preferences={preferences} />}
         </div>
       </div>
     </div>
