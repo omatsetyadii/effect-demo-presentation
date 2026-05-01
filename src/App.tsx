@@ -19,6 +19,7 @@ import {
   EffectComposability,
 } from "./presentation/Composability";
 import { CodeComparisonDemo } from "./presentation/CodeComparison";
+import { UserSettingsPage } from "./presentation/UserSettings";
 
 type DemoType =
   | "unstoppable"
@@ -26,6 +27,7 @@ type DemoType =
   | "failures"
   | "composability"
   | "code-comparison"
+  | "settings"
   | null;
 
 function App() {
@@ -71,6 +73,12 @@ function App() {
           className={activeDemo === "code-comparison" ? "active" : ""}
         >
           5. Code Comparison (Vanilla vs Effect)
+        </button>
+        <button
+          onClick={() => setActiveDemo("settings")}
+          className={activeDemo === "settings" ? "active" : ""}
+        >
+          6. User Settings
         </button>
         <button onClick={() => setActiveDemo(null)}>Hide Demos</button>
       </div>
@@ -290,6 +298,40 @@ function App() {
                 shorter - it makes complex operations composable, readable, and
                 correct by default. No manual state tracking, no cleanup bugs,
                 no resource leaks.
+              </li>
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* Demo 6: User Settings */}
+      {activeDemo === "settings" && (
+        <div className="comparison">
+          <div className="comparison-header">
+            <h2>Demo 6: User Settings Page with Profile Management</h2>
+            <p>
+              Schema validation, async save with Effect.gen, and auto-save with debouncing.
+            </p>
+          </div>
+          <UserSettingsPage />
+          <div className="comparison-footer">
+            <strong>Effect TS Patterns Used:</strong>
+            <ul>
+              <li>
+                <strong>Schema validation:</strong> <code>Schema.Struct</code> with{" "}
+                <code>Schema.minLength</code>, <code>Schema.pattern</code> — type-safe form validation
+              </li>
+              <li>
+                <strong>Async save:</strong> <code>Effect.gen</code> + <code>Effect.flatMap</code>{" "}
+                — sequential async operations with structured error handling
+              </li>
+              <li>
+                <strong>Auto-save debounce:</strong> <code>Effect.sleep</code> delays preference
+                saves without manual <code>setTimeout</code> juggling
+              </li>
+              <li>
+                <strong>Error handling:</strong> <code>Effect.catchAll</code> handles both
+                validation errors and network errors in a single pipeline
               </li>
             </ul>
           </div>
