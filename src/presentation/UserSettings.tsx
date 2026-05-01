@@ -7,8 +7,9 @@
  * - Ref for state management
  */
 
-import { useState, useCallback } from "react";
-import { Effect, Schema, pipe } from "effect";
+import { useState, useCallback, useRef } from "react";
+import { Effect, Schema, ParseResult, Fiber, pipe } from "effect";
+import "./UserSettings.css";
 
 // ============================================
 // Schema Definitions
@@ -86,10 +87,11 @@ const validateProfile = (data: ProfileData): Effect.Effect<ProfileData, Validati
   Effect.gen(function* () {
     const result = Schema.decodeUnknownEither(ProfileSchema)(data);
     if (result._tag === "Left") {
-      const errors = result.left.message
-        .split("\n")
-        .filter((line) => line.trim())
-        .map((msg) => ({ field: "unknown", message: msg }));
+      const formatted = ParseResult.ArrayFormatter.formatErrorSync(result.left);
+      const errors = formatted.map((e) => ({
+        field: e.path.length > 0 ? String(e.path[0]) : "unknown",
+        message: e.message,
+      }));
       yield* Effect.fail(errors);
     }
     return data;
@@ -311,12 +313,17 @@ interface PreferencesSectionProps {
 function PreferencesSection({ preferences, onSave }: PreferencesSectionProps) {
   const [prefs, setPrefs] = useState<PreferencesData>(preferences);
   const [saved, setSaved] = useState(false);
+  const fiberRef = useRef<Fiber.RuntimeFiber<void, never> | null>(null);
 
   const updatePref = <K extends keyof PreferencesData>(key: K, value: PreferencesData[K]) => {
     const next = { ...prefs, [key]: value };
     setPrefs(next);
 
-    // Auto-save preferences with Effect
+    // True debounce: interrupt the previous pending save fiber before starting a new one
+    if (fiberRef.current !== null) {
+      Effect.runFork(Fiber.interrupt(fiberRef.current));
+    }
+
     const program = pipe(
       Effect.sleep("300 millis"),
       Effect.flatMap(() => Effect.sync(() => onSave(next))),
@@ -328,7 +335,7 @@ function PreferencesSection({ preferences, onSave }: PreferencesSectionProps) {
       )
     );
 
-    Effect.runPromise(program);
+    fiberRef.current = Effect.runFork(program);
   };
 
   return (
@@ -396,8 +403,8 @@ function PreferencesSection({ preferences, onSave }: PreferencesSectionProps) {
       </div>
 
       <div className="effect-badge">
-        <strong>Effect TS:</strong> Debounced auto-save with <code>Effect.sleep</code> +{" "}
-        <code>Effect.sync</code>
+        <strong>Effect TS:</strong> True debounce via <code>Fiber.interrupt</code> —{" "}
+        rapid changes cancel the previous pending save fiber
       </div>
     </div>
   );
@@ -439,6 +446,11 @@ function AccountSection() {
         Effect.sync(() => {
           setExportState("done");
           setTimeout(() => setExportState("idle"), 3000);
+        })
+      ),
+      Effect.catchAll((_err) =>
+        Effect.sync(() => {
+          setExportState("idle");
         })
       )
     );
