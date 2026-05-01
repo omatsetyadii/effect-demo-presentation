@@ -20,7 +20,14 @@ import { TeamActivityApi } from "./api.js"
 import { ActivityHandlers, HealthHandlers, TeamHandlers } from "./handlers.js"
 import { ActivityRepositoryLive } from "./repository.js"
 
-const PORT = Number(process.env["PORT"] ?? 3001)
+function parsePort(raw: string | undefined): number {
+  const port = parseInt(raw ?? "3001", 10)
+  if (Number.isNaN(port) || port < 1 || port > 65535) {
+    throw new Error(`Invalid PORT: "${raw}". Must be an integer between 1 and 65535.`)
+  }
+  return port
+}
+const PORT = parsePort(process.env["PORT"])
 
 // -------------------------------------------------------------------------------------
 // Layer composition

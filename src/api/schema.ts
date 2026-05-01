@@ -88,11 +88,11 @@ export type HealthResponse = Schema.Schema.Type<typeof HealthResponse>
 // -------------------------------------------------------------------------------------
 
 export const ListActivitiesParams = Schema.Struct({
-  userId: Schema.optional(Schema.String),
+  userId: Schema.optional(Schema.String.pipe(Schema.maxLength(200))),
   action: Schema.optional(ActivityAction),
-  repository: Schema.optional(Schema.String),
-  limit: Schema.optional(Schema.NumberFromString),
-  offset: Schema.optional(Schema.NumberFromString),
+  repository: Schema.optional(Schema.String.pipe(Schema.maxLength(200))),
+  limit: Schema.optional(Schema.NumberFromString.pipe(Schema.between(1, 100))),
+  offset: Schema.optional(Schema.NumberFromString.pipe(Schema.greaterThanOrEqualTo(0))),
 })
 export type ListActivitiesParams = Schema.Schema.Type<typeof ListActivitiesParams>
 
