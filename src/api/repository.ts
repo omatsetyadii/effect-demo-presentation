@@ -139,8 +139,9 @@ export const TeamActivityRepositoryLive = Layer.effect(
   TeamActivityRepository,
   Effect.gen(function* () {
     const storeRef = yield* Ref.make(generateSeedActivities());
-
-    let nextId = 51; // seed data uses 1-50
+    // nextId is managed as a Ref to maintain Effect's referential transparency
+    // and ensure fiber-safety (no mutable state outside Effect's supervision).
+    const nextIdRef = yield* Ref.make(51); // seed data uses activity-1 through activity-50
 
     return TeamActivityRepository.of({
       findAll: ({ page, pageSize, userId, activityType }) =>
@@ -153,9 +154,16 @@ export const TeamActivityRepositoryLive = Layer.effect(
               (activityType === undefined || a.activityType === activityType)
           );
 
+          // Sort newest-first so pagination order is stable after creates
+          // (creates append to the store array, so without sorting a newly
+          // created record would never appear on page 1).
+          const sorted = [...filtered].sort((a, b) =>
+            b.timestamp.localeCompare(a.timestamp)
+          );
+
           return {
-            total: filtered.length,
-            data: filtered.slice((page - 1) * pageSize, page * pageSize),
+            total: sorted.length,
+            data: sorted.slice((page - 1) * pageSize, page * pageSize),
           };
         }),
 
@@ -171,9 +179,10 @@ export const TeamActivityRepositoryLive = Layer.effect(
 
       create: (input) =>
         Effect.gen(function* () {
+          const nextId = yield* Ref.getAndUpdate(nextIdRef, (n) => n + 1);
           const newActivity: TeamActivity = {
             ...input,
-            id: `activity-${nextId++}`,
+            id: `activity-${nextId}`,
             timestamp: new Date().toISOString(),
           };
           yield* Ref.update(storeRef, (activities) => [
@@ -210,7 +219,11 @@ export const TeamActivityRepositoryLive = Layer.effect(
             totalActivities: store.length,
             byType,
             byUser,
-            recentActivity: store.slice(0, 10),
+            // Sort newest-first before slicing so newly created activities
+            // (appended to the end of the store array) are correctly included.
+            recentActivity: [...store]
+              .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+              .slice(0, 10),
           };
         }),
     });

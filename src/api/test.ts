@@ -1,9 +1,12 @@
 /**
- * Team Activity API – integration tests
+ * Team Activity API – repository integration tests
  *
  * Run:  yarn test:api
  *
- * Tests the repository and route logic end-to-end without a running HTTP server.
+ * Tests the repository layer (findAll, findById, create, getSummary).
+ * Route-level behaviours (query-param parsing, HTTP status codes, request body
+ * validation) are exercised manually via `yarn start:api`, as they require the
+ * full @effect/platform HTTP server context.
  */
 
 import { Effect } from "effect";
@@ -126,6 +129,12 @@ const tests = Effect.gen(function* () {
       : true
   );
   ok("recentActivity returns at most 10 items", summary.recentActivity.length <= 10);
+  // The newly created activity has the most recent timestamp, so it must appear
+  // first in recentActivity now that getSummary sorts by timestamp descending.
+  ok(
+    "recentActivity includes the most recently created activity",
+    summary.recentActivity[0]?.id === newActivity.id
+  );
 });
 
 // ---------------------------------------------------------------------------

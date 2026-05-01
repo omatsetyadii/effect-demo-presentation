@@ -34,10 +34,10 @@ export type TeamActivity = typeof TeamActivity.Type;
 // ---------------------------------------------------------------------------
 
 export const CreateTeamActivityRequest = Schema.Struct({
-  userId: Schema.String,
-  userName: Schema.String,
+  userId: Schema.String.pipe(Schema.maxLength(128)),
+  userName: Schema.String.pipe(Schema.maxLength(128)),
   activityType: ActivityType,
-  description: Schema.String,
+  description: Schema.String.pipe(Schema.maxLength(1000)),
   metadata: Schema.optional(Schema.Record({ key: Schema.String, value: Schema.Unknown })),
 });
 export type CreateTeamActivityRequest = typeof CreateTeamActivityRequest.Type;
