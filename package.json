@@ -11,12 +11,14 @@
     "learn:thunk": "tsx src/learning/1-thunk-basics.ts",
     "learn:concurrency": "tsx src/learning/2-concurrency.ts",
     "learn:fiber": "tsx src/learning/3-fiber-control.ts",
-    "learn:all": "yarn learn:thunk && echo '\n' && yarn learn:concurrency && echo '\n' && yarn learn:fiber"
+    "learn:all": "yarn learn:thunk && echo '\n' && yarn learn:concurrency && echo '\n' && yarn learn:fiber",
+    "start:api": "tsx src/api/server.ts",
+    "test:api": "tsx src/api/test.ts"
   },
   "dependencies": {
-    "@effect/platform": "^0.94.1",
-    "@effect/schema": "^0.75.5",
-    "effect": "^3.19.14",
+    "@effect/platform": "^0.96.0",
+    "@effect/platform-node": "^0.106.0",
+    "effect": "^3.21.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
