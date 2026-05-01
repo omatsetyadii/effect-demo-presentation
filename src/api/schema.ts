@@ -24,7 +24,9 @@ export const TeamActivity = Schema.Struct({
   userName: Schema.String,
   activityType: ActivityType,
   description: Schema.String,
-  timestamp: Schema.String,
+  timestamp: Schema.String.pipe(
+    Schema.filter((s) => !isNaN(Date.parse(s)), { message: () => "invalid ISO date" })
+  ),
   metadata: Schema.optional(Schema.Record({ key: Schema.String, value: Schema.Unknown })),
 });
 export type TeamActivity = typeof TeamActivity.Type;
@@ -34,10 +36,10 @@ export type TeamActivity = typeof TeamActivity.Type;
 // ---------------------------------------------------------------------------
 
 export const CreateTeamActivityRequest = Schema.Struct({
-  userId: Schema.String.pipe(Schema.maxLength(128)),
-  userName: Schema.String.pipe(Schema.maxLength(128)),
+  userId: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(128)),
+  userName: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(128)),
   activityType: ActivityType,
-  description: Schema.String.pipe(Schema.maxLength(1000)),
+  description: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(1000)),
   metadata: Schema.optional(Schema.Record({ key: Schema.String, value: Schema.Unknown })),
 });
 export type CreateTeamActivityRequest = typeof CreateTeamActivityRequest.Type;

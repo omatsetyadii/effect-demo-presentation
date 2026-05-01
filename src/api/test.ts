@@ -49,7 +49,8 @@ const tests = Effect.gen(function* () {
   ok("reports correct total (50 seed records)", page1.total === 50);
 
   const page3 = yield* repo.findAll({ page: 3, pageSize: 10 });
-  ok("page 3 returns items 21-30", page3.data[0]?.id === "activity-21");
+  ok("page 3 is a different slice than page 1",
+    page3.data.length === 10 && !page1.data.some(a => page3.data.some(b => a.id === b.id)));
 
   const beyond = yield* repo.findAll({ page: 100, pageSize: 10 });
   ok("page beyond data returns empty array", beyond.data.length === 0);

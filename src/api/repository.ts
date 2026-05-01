@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Ref } from "effect";
+import { Context, Data, Effect, Layer, Ref } from "effect";
 import type { ActivityType, TeamActivity } from "./schema.ts";
 
 // ---------------------------------------------------------------------------
@@ -120,9 +120,9 @@ export interface TeamActivityRepository {
 // Error types
 // ---------------------------------------------------------------------------
 
-export class TeamActivityNotFoundError {
-  readonly _tag = "TeamActivityNotFoundError";
-  constructor(readonly id: string) {}
+export class TeamActivityNotFoundError extends Data.TaggedError("TeamActivityNotFoundError")<{
+  readonly id: string;
+}> {
   get message() {
     return `Activity '${this.id}' not found`;
   }
@@ -138,10 +138,11 @@ export const TeamActivityRepository =
 export const TeamActivityRepositoryLive = Layer.effect(
   TeamActivityRepository,
   Effect.gen(function* () {
-    const storeRef = yield* Ref.make(generateSeedActivities());
+    const seed = generateSeedActivities();
+    const storeRef = yield* Ref.make(seed);
     // nextId is managed as a Ref to maintain Effect's referential transparency
     // and ensure fiber-safety (no mutable state outside Effect's supervision).
-    const nextIdRef = yield* Ref.make(51); // seed data uses activity-1 through activity-50
+    const nextIdRef = yield* Ref.make(seed.length + 1);
 
     return TeamActivityRepository.of({
       findAll: ({ page, pageSize, userId, activityType }) =>
@@ -172,7 +173,7 @@ export const TeamActivityRepositoryLive = Layer.effect(
           const store = yield* Ref.get(storeRef);
           const activity = store.find((a) => a.id === id);
           if (activity === undefined) {
-            return yield* Effect.fail(new TeamActivityNotFoundError(id));
+            return yield* Effect.fail(new TeamActivityNotFoundError({ id }));
           }
           return activity;
         }),

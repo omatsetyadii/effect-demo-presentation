@@ -1,11 +1,11 @@
-import { Effect } from "effect";
+import { Effect, Schema } from "effect";
 import {
   HttpRouter,
   HttpServerRequest,
   HttpServerResponse,
 } from "@effect/platform";
 import { TeamActivityRepository } from "./repository.ts";
-import { CreateTeamActivityRequest } from "./schema.ts";
+import { ActivityType, CreateTeamActivityRequest } from "./schema.ts";
 
 // ---------------------------------------------------------------------------
 // Helper: parse integer query param with a fallback
@@ -31,12 +31,7 @@ const listActivities = Effect.gen(function* () {
   // Treat unknown activityType values as "no filter" rather than an error
   const activityTypeRaw = qs.get("activityType") ?? undefined;
   const activityType =
-    activityTypeRaw === "commit" ||
-    activityTypeRaw === "pull_request" ||
-    activityTypeRaw === "code_review" ||
-    activityTypeRaw === "comment" ||
-    activityTypeRaw === "issue" ||
-    activityTypeRaw === "deployment"
+    activityTypeRaw !== undefined && Schema.is(ActivityType)(activityTypeRaw)
       ? activityTypeRaw
       : undefined;
 

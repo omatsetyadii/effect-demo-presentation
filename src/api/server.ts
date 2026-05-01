@@ -20,7 +20,7 @@ import * as Http from "node:http";
 import { teamActivityRouter } from "./routes.ts";
 import { TeamActivityRepositoryLive } from "./repository.ts";
 
-const PORT = parseInt(process.env["PORT"] ?? "3000", 10);
+const PORT = parseInt(process.env["PORT"] ?? "3000", 10) || 3000;
 
 // Apply logger middleware to the router before serving
 const app = HttpMiddleware.logger(teamActivityRouter);
