@@ -19,6 +19,7 @@ import {
   EffectComposability,
 } from "./presentation/Composability";
 import { CodeComparisonDemo } from "./presentation/CodeComparison";
+import { AIAgentPlainJS, AIAgentEffect } from "./presentation/AIAgentWorkflow";
 
 type DemoType =
   | "unstoppable"
@@ -26,6 +27,7 @@ type DemoType =
   | "failures"
   | "composability"
   | "code-comparison"
+  | "ai-agent"
   | null;
 
 function App() {
@@ -71,6 +73,12 @@ function App() {
           className={activeDemo === "code-comparison" ? "active" : ""}
         >
           5. Code Comparison (Vanilla vs Effect)
+        </button>
+        <button
+          onClick={() => setActiveDemo("ai-agent")}
+          className={activeDemo === "ai-agent" ? "active" : ""}
+        >
+          6. AI Agent Workflow
         </button>
         <button onClick={() => setActiveDemo(null)}>Hide Demos</button>
       </div>
@@ -290,6 +298,47 @@ function App() {
                 shorter - it makes complex operations composable, readable, and
                 correct by default. No manual state tracking, no cleanup bugs,
                 no resource leaks.
+              </li>
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* Demo 6: AI Agent Workflow */}
+      {activeDemo === "ai-agent" && (
+        <div className="comparison">
+          <div className="comparison-header">
+            <h2>Demo 6: AI Agent Workflow</h2>
+            <p>
+              Multi-step workflow with cancellation at any point. Plain JS
+              requires manual signal checks; Effect handles it automatically.
+            </p>
+          </div>
+          <div className="comparison-grid">
+            <AIAgentPlainJS />
+            <AIAgentEffect />
+          </div>
+          <div className="comparison-footer">
+            <strong>Key Insight:</strong>
+            <ul>
+              <li>
+                <strong>Plain JS:</strong> Must manually check{" "}
+                <code>signal.aborted</code> after EVERY async step. Forgetting
+                one = the agent keeps running after cancel.
+              </li>
+              <li>
+                <strong>Effect:</strong> Cancellation is built-in. Interrupting
+                a fiber stops the workflow at the next <code>yield*</code> —
+                no manual checks anywhere.
+              </li>
+              <li>
+                <strong>Parallel fetch:</strong> Plain JS — if one fetch fails,
+                the sibling keeps running. Effect — one failure cancels all
+                siblings automatically.
+              </li>
+              <li>
+                <strong>This is structured concurrency:</strong> Spawn tasks,
+                get automatic cleanup. No orphaned fibers, no resource leaks.
               </li>
             </ul>
           </div>
