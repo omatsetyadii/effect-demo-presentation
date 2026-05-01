@@ -33,7 +33,7 @@ export type TeamRole = Schema.Schema.Type<typeof TeamRole>
 export const TeamMember = Schema.Struct({
   id: Schema.String,
   name: Schema.String,
-  email: Schema.String,
+  email: Schema.String.pipe(Schema.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)),
   role: TeamRole,
 }).annotations({ identifier: "TeamMember", title: "TeamMember" })
 export type TeamMember = Schema.Schema.Type<typeof TeamMember>
@@ -45,7 +45,7 @@ export const TeamActivity = Schema.Struct({
   action: ActivityAction,
   repository: Schema.String,
   description: Schema.String,
-  timestamp: Schema.String,
+  timestamp: Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)),
   metadata: Schema.optional(Schema.Record({ key: Schema.String, value: Schema.String })),
 }).annotations({ identifier: "TeamActivity", title: "TeamActivity" })
 export type TeamActivity = Schema.Schema.Type<typeof TeamActivity>
@@ -70,8 +70,8 @@ export const ActivitySummary = Schema.Struct({
   byRepository: Schema.Array(ActivityRepoStat),
   recentActivities: Schema.Array(TeamActivity),
   period: Schema.Struct({
-    from: Schema.String,
-    to: Schema.String,
+    from: Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)),
+    to: Schema.String.pipe(Schema.pattern(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)),
   }),
 }).annotations({ identifier: "ActivitySummary", title: "ActivitySummary" })
 export type ActivitySummary = Schema.Schema.Type<typeof ActivitySummary>

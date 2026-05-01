@@ -50,7 +50,7 @@ const HttpAppLive = HttpApiBuilder.serve().pipe(
 
 // 4. Full server layer: HTTP app + Node.js HTTP server
 const ServerLive = HttpAppLive.pipe(
-  Layer.provide(NodeHttpServer.layer(() => createServer(), { port: PORT })),
+  Layer.provide(NodeHttpServer.layer(createServer, { port: PORT })),
 )
 
 // -------------------------------------------------------------------------------------

@@ -26,6 +26,7 @@ const MEMBERS: TeamMember[] = [
   { id: "u5", name: "Doni Santoso", email: "doni@jitera.com", role: "devops" },
 ]
 
+// Timestamps are relative to server startup time; refresh the process to reset.
 const now = new Date()
 function daysAgo(n: number): string {
   const d = new Date(now)
@@ -204,6 +205,8 @@ export interface ActivityRepository {
 
 export const ActivityRepository = Context.GenericTag<ActivityRepository>("ActivityRepository")
 
+const RECENT_ACTIVITIES_LIMIT = 5
+
 // -------------------------------------------------------------------------------------
 // In-memory implementation
 // -------------------------------------------------------------------------------------
@@ -283,7 +286,7 @@ const make: ActivityRepository = {
       byAction,
       byUser,
       byRepository,
-      recentActivities: sorted.slice(0, 5),
+      recentActivities: sorted.slice(0, RECENT_ACTIVITIES_LIMIT),
       period: {
         from: oldest?.timestamp ?? now.toISOString(),
         to: newest?.timestamp ?? now.toISOString(),
